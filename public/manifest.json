@@ -1,0 +1,16 @@
+{
+  "name": "Coli PWA",
+  "short_name": "Coli",
+  "description": "Explora y recomienda negocios en tu ciudad.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#E4007C",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
