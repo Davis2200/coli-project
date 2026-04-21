@@ -4,50 +4,110 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
-import { ArrowRight, Lock } from "lucide-react";
-import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Lock, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useUserStore } from "@/lib/store";
+import { MOCK_SESSIONS } from "@/lib/mock-data";
 
+// Esquema de validación con Zod
 const loginSchema = z.object({
   email: z.string().email("Correo inválido"),
   password: z.string().min(6, "Mínimo 6 caracteres"),
 });
 
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<z.infer<typeof loginSchema>>({
+  const router = useRouter();
+  const login = useUserStore((state) => state.login);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError
+  } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema)
   });
 
-  const onSubmit = (data: z.infer<typeof loginSchema>) => {
-    console.log("Iniciando sesión con:", data);
-    // TODO: Connect to Neo4j / Auth handler
+  const onSubmit = async (data: LoginFormValues) => {
+    await new Promise(resolve => setTimeout(resolve, 1400));
+
+    const mockUser = Object.values(MOCK_SESSIONS).find(
+      (user) => user.email.toLowerCase() === data.email.toLowerCase()
+    );
+
+    if (mockUser && mockUser.password === data.password) {
+      // ✅ MODIFICACIÓN: Pasamos el objeto completo al store
+      login({
+        name: mockUser.name,
+        role: mockUser.role as 'turista' | 'afiliado' | 'business'
+      });
+
+      // Redirección según rol (se mantiene igual)
+      if (mockUser.role === "negocio") {
+        router.push(`/business/${mockUser.id}`);
+      } else if (mockUser.role === "turista") {
+        router.push("/turista/explorar");
+      } else if (mockUser.role === "afiliado") {
+        router.push("/afiliado");
+      } else {
+        router.push("/");
+      }
+
+    } else {
+      if (!mockUser) {
+        setError("email", { message: "Usuario no encontrado" });
+      } else {
+        setError("password", { message: "Contraseña incorrecta" });
+      }
+    }
   };
 
+
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full">
-      <div className="text-center mb-8">
-        <div className="w-12 h-12 bg-pink-500/10 border border-pink-500/20 rounded-full flex items-center justify-center mx-auto text-pink-400 mb-4">
-          <Lock className="w-5 h-5" />
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="w-full max-w-sm mx-auto"
+    >
+      <div className="text-center mb-10">
+        <div className="w-14 h-14 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center mx-auto text-indigo-600 mb-5 shadow-sm">
+          <Lock className="w-6 h-6" />
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Bienvenido de vuelta</h2>
-        <p className="text-sm text-muted-foreground">Ingresa para ver tus reservaciones y comisiones</p>
+        <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Bienvenido</h2>
+        <p className="text-sm font-medium text-slate-400 mt-2">Gestiona tu cuenta en la comunidad Coli</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">Correo Electrónico</label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Input de Email */}
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Correo Electrónico</label>
           <input
             {...register("email")}
             type="email"
             placeholder="tu@correo.com"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all placeholder:text-white/20"
+            className={`w-full bg-white border ${errors.email ? 'border-rose-300 ring-rose-500/10' : 'border-slate-200 ring-indigo-500/5'} rounded-[20px] px-5 py-4 text-slate-900 focus:outline-none focus:ring-4 focus:border-indigo-500 transition-all placeholder:text-slate-300 text-sm font-medium`}
           />
-          {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
+          <AnimatePresence>
+            {errors.email && (
+              <motion.p
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="text-rose-600 text-[10px] font-bold px-2 flex items-center gap-1"
+              >
+                <AlertCircle className="w-3 h-3" /> {errors.email.message}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
-        
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <label className="block text-sm font-medium text-muted-foreground">Contraseña</label>
-            <Link href="/recuperar" className="text-xs text-pink-400 hover:text-pink-300">
+
+        {/* Input de Contraseña */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center px-1">
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">Contraseña</label>
+            <Link href="/recuperar" className="text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors">
               ¿Olvidaste tu contraseña?
             </Link>
           </div>
@@ -55,24 +115,36 @@ export default function LoginPage() {
             {...register("password")}
             type="password"
             placeholder="••••••••"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all placeholder:text-white/20"
+            className={`w-full bg-white border ${errors.password ? 'border-rose-300 ring-rose-500/10' : 'border-slate-200 ring-indigo-500/5'} rounded-[20px] px-5 py-4 text-slate-900 focus:outline-none focus:ring-4 focus:border-indigo-500 transition-all placeholder:text-slate-300 text-sm font-medium`}
           />
-          {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="text-rose-600 text-[10px] font-bold px-2 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> {errors.password.message}
+            </p>
+          )}
         </div>
 
+        {/* Botón de Iniciar Sesión */}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full flex justify-center items-center gap-2 py-4 bg-gradient-coli text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all mt-8 shadow-[0_0_20px_rgba(228,0,124,0.3)] hover:shadow-[0_0_30px_rgba(228,0,124,0.5)]"
+          className="w-full flex justify-center items-center gap-3 py-5 bg-indigo-600 text-white rounded-[24px] font-black shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 transition-all mt-10 disabled:opacity-50 disabled:cursor-not-allowed group"
         >
-          {isSubmitting ? "Cargando..." : "Iniciar Sesión"} <ArrowRight className="w-5 h-5" />
+          {isSubmitting ? (
+            <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          ) : (
+            <>
+              Iniciar Sesión
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </>
+          )}
         </button>
       </form>
 
-      <div className="text-center mt-8 pt-6 border-t border-white/10">
-        <p className="text-sm text-muted-foreground">
+      <div className="text-center mt-12 pt-6 border-t border-slate-100">
+        <p className="text-xs font-medium text-slate-400">
           ¿No tienes cuenta? {" "}
-          <Link href="/register" className="text-pink-400 hover:text-pink-300 font-bold transition-colors">
+          <Link href="/register" className="text-rose-500 hover:text-rose-600 font-black transition-colors">
             Regístrate aquí
           </Link>
         </p>

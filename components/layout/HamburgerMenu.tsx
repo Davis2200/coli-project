@@ -1,81 +1,75 @@
 "use client";
-
-import { useState } from "react";
+import { X, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { MENU_LINKS } from "@/lib/navigation";
 
-type Role = "turista" | "afiliado" | "negocio" | "invitado" | null;
+interface HamburgerMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  role: 'turista' | 'afiliado' | 'business';
+}
 
-export default function HamburgerMenu({ role }: { role: Role }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  // Lógica de menús según Growth Hacking y permisos mencionados
-  const menuItems = {
-    turista: [
-      { name: "Explorar Negocios", path: "/turista/explorar" },
-      { name: "Mis Reservas", path: "/turista/reservas" },
-      { name: "Mis Promociones", path: "/turista/promociones" },
-      { name: "Mis Lugares", path: "/turista/lugares" },
-      { name: "Chat", path: "/turista/chat" },
-      { name: "Referidos", path: "/turista/referidos" },
-    ],
-    afiliado: [
-      { name: "Explorar Negocios", path: "/afiliado/explorar" },
-      { name: "Recomendaciones", path: "/afiliado/recomendaciones" },
-      { name: "Mis Promociones", path: "/afiliado/promociones" },
-      { name: "Lugares Pactados", path: "/afiliado/lugares" },
-      { name: "Chat", path: "/afiliado/chat" },
-    ],
-    negocio: [
-      { name: "Dashboard", path: "/partner" },
-      { name: "Gestión de Reservas", path: "/partner/reservas" },
-      { name: "Mis Servicios", path: "/partner/servicios" },
-      { name: "Promociones", path: "/partner/promociones" },
-      { name: "Mapa de Competencia", path: "/partner/lugares" },
-      { name: "Mensajes", path: "/partner/chat" },
-    ],
-    invitado: [
-      { name: "Explorar Negocios", path: "/" },
-      { name: "Mi Reserva (Pendiente)", path: "/invitado/reserva" },
-      { name: "Regístrate", path: "/register" },
-    ],
-  };
-
-  const links = role && role !== "invitado" ? menuItems[role] : menuItems.turista; // Default fallback to turista for styling context
+export function HamburgerMenu({ isOpen, onClose, role }: HamburgerMenuProps) {
+  // Obtenemos los links según el rol del usuario logueado
+  const links = MENU_LINKS[role] || MENU_LINKS.turista;
 
   return (
-    <>
-      <button 
-        onClick={() => setIsOpen(!isOpen)} 
-        className="text-white p-2 relative z-[60] hover:text-pink-400 transition-colors"
-      >
-        {isOpen ? <X size={28} /> : <Menu size={28} />}
-      </button>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100]"
+          />
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="absolute top-[60px] right-0 w-64 glass-panel bg-black/90 shadow-[0_0_40px_rgba(228,0,124,0.15)] rounded-bl-3xl border-l border-b border-pink-500/20 overflow-hidden z-50 backdrop-blur-xl"
+          {/* Panel Lateral */}
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed top-0 left-0 h-full w-[300px] bg-white z-[101] shadow-2xl flex flex-col"
           >
-            <nav className="flex flex-col py-2">
+            {/* Header del Menú */}
+            <div className="p-6 border-b border-slate-50 flex justify-between items-center">
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-indigo-600">Menú Coli</span>
+              <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-400">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Links Dinámicos */}
+            <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
               {links.map((link) => (
                 <Link
-                  key={link.name}
-                  href={link.path}
-                  onClick={() => setIsOpen(false)}
-                  className="px-6 py-4 font-medium text-white/80 hover:text-pink-400 hover:bg-white/5 transition-all border-b border-white/5 last:border-0"
+                  key={link.href}
+                  href={link.href}
+                  onClick={onClose}
+                  className="flex items-center justify-between p-4 rounded-[20px] hover:bg-indigo-50 group transition-all"
                 >
-                  {link.name}
+                  <span className="font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">
+                    {link.name}
+                  </span>
+                  <ChevronRight size={16} className="text-slate-300 group-hover:text-indigo-400 transform group-hover:translate-x-1 transition-all" />
                 </Link>
               ))}
             </nav>
+
+            {/* Footer del Menú */}
+            <div className="p-8 border-t border-slate-50">
+              <div className="bg-slate-50 rounded-[24px] p-4 text-center">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estás en modo</p>
+                <p className="text-sm font-black text-slate-900 uppercase">{role}</p>
+              </div>
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

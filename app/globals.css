@@ -20,40 +20,40 @@
 
 @layer base {
   :root {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
+    --background: 210 40% 98%; /* Slate-50 */
+    --foreground: 222 47% 11%; /* Slate-900 */
 
-    --card: 240 10% 4%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 240 10% 4%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Rosa Mexicano */
-    --primary: 327 100% 45%;
+    /* Púrpura Colibrí (Indigo-600) */
+    --primary: 243 75% 59%;
     --primary-foreground: 0 0% 100%;
 
-    /* Morado vibrante */
-    --secondary: 271 81% 56%;
+    /* Rosa Mexicano / Atardecer (Rose-600) */
+    --secondary: 347 77% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 65%;
-
-    /* Acento Morado oscuro */
-    --accent: 273 67% 39%;
+    /* Verde Naturaleza (Emerald-600) */
+    --accent: 161 84% 31%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 327 100% 45%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --radius: 1rem;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 243 75% 59%;
 
-    --surface: 240 10% 8%;
+    --radius: 1.5rem;
+
+    --surface: 0 0% 100%;
   }
 
   * {
@@ -68,11 +68,11 @@
 
 @layer utilities {
   .glass-panel {
-    background: rgba(15, 15, 20, 0.6);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.03);
   }
 
   .text-gradient {

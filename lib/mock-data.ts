@@ -233,3 +233,44 @@ export const MOCK_BUSINESSES: Business[] = [
     category: "Hotel"
   }
 ];
+
+
+export interface UserProfile {
+  id: string;
+  role: 'turista' | 'afiliado' | 'negocio' | 'admin';
+  name: string;
+  email: string;
+  password: string; // <-- Nueva propiedad
+  avatar?: string;
+}
+
+export const MOCK_SESSIONS: Record<string, UserProfile> = {
+  turista_test: {
+    id: "u1",
+    role: "turista",
+    name: "David Explorador",
+    email: "turista@coli.com",
+    password: "password123" // Contraseña de prueba
+  },
+  afiliado_test: {
+    id: "u2",
+    role: "afiliado",
+    name: "Agencia Delta",
+    email: "ventas@delta.com",
+    password: "password123"
+  },
+  negocio_test: {
+    id: "u3",
+    role: "negocio",
+    name: "Admin Sabor a Maguey",
+    email: "admin@saboramaguey.com",
+    password: "password123"
+  },
+  admin_test: {
+    id: "u4",
+    role: "admin",
+    name: "Súper Admin Coli",
+    email: "admin@coli.com",
+    password: "password123"
+  }
+};
